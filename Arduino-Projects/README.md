@@ -1,5 +1,5 @@
 These projects are made by me for me, mostly for university projects or to be added to the CV. 
-Anyone is free to use, be inspired, copy, edit or add to the codes/projects.
+Anyone is free to use, be inspired, copy, edit or add the codes/projects to their own.
 
 My name is not to be used in any other projects that I do not give personal permission.
 
