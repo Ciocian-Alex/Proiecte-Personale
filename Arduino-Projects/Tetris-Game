@@ -1,1 +1,291 @@
+  //Included libraries (don't forget to install first)
+  #include <SPI.h>
+  #include <MD_MAX72xx.h>
 
+  //LED Matrix pinout
+  #define SS_1_PIN 11
+  #define DIN_1_PIN 10
+  #define CLK_PIN 13
+
+  //Analog Joystick pinout
+  #define SEL_PIN 2
+  #define VERT_PIN A1
+  #define HORZ_PIN A2
+
+  //Game constants
+  const int HORIZONTAL_MODULES_USED = 1;
+  const int VERTICAL_MODULES_USED = 3;
+
+  //Cursor initial position
+  const int border_down = VERTICAL_MODULES_USED * 8 - 1;
+  const int border_up = 0;                              //Top right corner coordinate
+  const int border_right = 8;                           //Top right corner coordinate
+  const int border_left = 0;                            //Max 7 for 1 LED Matrix Module
+
+  //Grid size
+  const int GRID_WIDTH = 8;
+  const int GRID_HEIGHT = border_down;
+
+  bool grid[GRID_WIDTH][GRID_HEIGHT];
+
+  //Tetris block types
+  struct TetrisPiece {
+    int width;
+    int height;
+    uint8_t shape[4][4]; // Adjust the size based on the maximum possible size of a tetris piece
+  };
+
+  const TetrisPiece tetrisPieces[7][4] = {
+    // Tetris Piece 1 | I
+    { {4, 1, {{1, 1, 1, 1}}},         {1, 4, {{1}, {1}, {1}, {1}}},     {4, 1, {{1, 1, 1, 1}}},         {1, 4, {{1}, {1}, {1}, {1}}}, },
+    // Tetris Piece 2 | J
+    { {3, 2, {{1, 1, 1}, {0, 0, 1}}}, {2, 3, {{0, 1}, {0, 1}, {1, 1}}}, {3, 2, {{1}, {1, 1, 1}}}, {2, 3, {{1, 1}, {1}, {1}}}, },
+    // Tetris Piece 3 | T
+    { {3, 2, {{0, 1, 0}, {1, 1, 1}}}, {2, 3, {{1}, {1, 1}, { 1}}}, {3, 2, {{1, 1, 1}, {0, 1}}}, {2, 3, {{0, 1}, {1, 1}, {0, 1}}}, },
+    // Tetris Piece 4 | Sqr
+    { {2, 2, {{1, 1}, {1, 1}}},       {2, 2, {{1, 1}, {1, 1}}},         {2, 2, {{1, 1}, {1, 1}}},       {2, 2, {{1, 1}, {1, 1}}}, },
+    // Tetris Piece 5 | S
+    { {3, 2, {{0, 1, 1}, {1, 1, 0}}}, {2, 3, {{1, 0}, {1, 1}, {0, 1}}}, {3, 2, {{0, 1, 1}, {1, 1, 0}}}, {2, 3, {{1, 0}, {1, 1}, {0, 1}}},},
+    // Tetris Piece 6 | L
+    { {3, 2, {{0, 0, 1}, {1, 1, 1}}}, {2, 3, {{1}, {1}, {1, 1}}}, {3, 2, {{1, 1, 1}, {1}}}, {2, 3, {{1, 1}, {0, 1}, {0, 1}}},},
+    // Tetris Piece 7 | Z
+    { {3, 2, {{1, 1, 0}, {0, 1, 1}}}, {2, 3, {{0, 1}, {1, 1}, {1, 0}}}, {3, 2, {{1, 1, 0}, {0, 1, 1}}}, {2, 3, {{0, 1}, {1, 1}, {1, 0}}},},
+  };
+
+
+  MD_MAX72XX mx = MD_MAX72XX(MD_MAX72XX::PAROLA_HW, 
+                        DIN_1_PIN,
+                        CLK_PIN,
+                        SS_1_PIN, 
+                        3);
+
+
+  //Game state variables
+  int cursorX = 0;  // Rows
+  int cursorY = 0;  // Column
+  bool createBlock = true;
+  int randomTetrisRotation = 0, randomTetrisNumber = 0;
+  TetrisPiece currPiece;
+
+  void setup(){
+    Serial.begin(9600);
+
+    //LED Matrix pinMode
+    pinMode(CLK_PIN, OUTPUT);
+    pinMode(SS_1_PIN, OUTPUT);
+    pinMode(DIN_1_PIN, OUTPUT);
+
+    //Analog joystick pinMode
+    pinMode(HORZ_PIN, INPUT);
+    pinMode(VERT_PIN, INPUT);
+    pinMode(SEL_PIN, INPUT_PULLUP);
+    
+    //MX72XX
+    if(!mx.begin()){ //Start error check
+      Serial.println("Error initializing LED matrix 1");
+    while(1){
+      delay(1000);
+    }
+    }
+    mx.control(MD_MAX72XX::INTENSITY, 1);
+    mx.clear();
+
+    //Initialize grid values to false
+    for(int i = 0; i < GRID_WIDTH; i++){ 
+      for(int j = 0; j < GRID_HEIGHT; j++){
+        grid[i][j] = false;
+      }
+    }
+    randomSeed(analogRead(0));
+  }
+
+  //Main game loop
+  void loop(){
+    clearFallingBlock(currPiece);
+    
+    if(createBlock){
+      currPiece = tetrisPieces[6][1];
+      //currPiece = getRandomPiece();
+      createBlock = !createBlock;
+      getRandomCursor();
+    }
+    handleGameControls(currPiece);
+    displayFallingBlock(currPiece);
+    rotateFallingBlock(currPiece);
+
+    if(checkPlacement(currPiece)){
+      placeTetrisBlock(currPiece);
+
+      checkAndDeleteFullRows();
+    }
+
+    placedBlocksController();
+    delay(200);
+  }
+
+  //Methods ----------------------------------------
+
+void checkAndDeleteFullRows() {
+    for (int row = GRID_HEIGHT - 1; row >= 0; row--) {
+        // Use getColumn method to get the state of LEDs in the current row
+        bool fullRow = isRowFull(row);
+
+        // If the row is full, delete it and move upper rows down
+        if (fullRow) {
+            deleteRow(row);
+            moveRowsDown(row);
+            // Check the same row again as it may have new content now
+            row++;
+        }
+    }
+}
+
+bool isRowFull(int row) {
+    if(mx.getColumn(row) == 0b11111111)
+      return true;
+    return false;
+}
+
+void deleteRow(int row) {
+    for (int col = 0; col < GRID_WIDTH; col++) {
+        mx.setPoint(col, row, false);
+        grid[col][row] = false;  // Update the grid to reflect the deletion
+    }
+}
+
+void moveRowsDown(int deletedRow) {
+    for (int row = deletedRow - 1; row >= 0; row--) {
+        for (int col = 0; col < GRID_WIDTH; col++) {
+            // Move the content of the upper row down
+            mx.setPoint(col, row + 1, mx.getPoint(col, row));
+            grid[col][row + 1] = grid[col][row];  // Update the grid accordingly
+        }
+    }
+}
+
+  void getRandomCursor(){
+    cursorX = random(GRID_WIDTH-currPiece.width);
+  }
+
+  TetrisPiece getRandomPiece(){
+    randomTetrisNumber = random(7);
+    randomTetrisRotation = random(4);
+    return tetrisPieces[randomTetrisNumber][randomTetrisRotation];
+  }
+
+  void placeTetrisBlock(const TetrisPiece& piece) {
+    int tetrisPieceWidth = piece.height; // Invert width and height
+    int tetrisPieceHeight = piece.width;
+
+    for (int i = 0; i < tetrisPieceHeight; i++) {
+      for (int j = 0; j < tetrisPieceWidth; j++) {
+        if (piece.shape[j][i] != 0) {
+          // Align cursorY to rows and cursorX to columns
+          int gridX = cursorX + i;
+          int gridY = cursorY + j;
+
+          // Check if the grid position is within bounds
+          if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+            grid[gridX][gridY] = true; // Mark cell as occupied
+          }
+        }
+      }
+    }
+
+    // Reset block only if within the right border
+    if (cursorX <= border_right - tetrisPieceHeight) {
+      cursorY = 1; // Initial position for the falling tetris block
+      createBlock = true;
+    }
+  }
+
+  bool checkPlacement(const TetrisPiece& piece) {
+    int tetrisPieceWidth = piece.height; // Invert width and height
+    int tetrisPieceHeight = piece.width;
+
+    if (cursorY + piece.height >= GRID_HEIGHT) {
+      return true; // Place the piece if it reaches the bottom
+    }
+
+    for (int i = 0; i < piece.width; i++) {
+      for (int j = 0; j < piece.height; j++) {
+        if (grid[cursorX + i][cursorY + j + 1] && piece.shape[j][i] != 0) {
+          return true; // Place the piece if it collides with a placed block
+        }
+      }
+    }
+
+    return false; // Continue falling
+  }
+
+  void placedBlocksController(){
+    for(int i = 0; i < GRID_WIDTH; i++){
+      for(int j = 0; j < GRID_HEIGHT; j++){
+        if(grid[i][j]){
+          mx.setPoint(i, j, true);
+        }
+      }
+    }
+  }
+
+  void displayFallingBlock(const TetrisPiece& piece){
+    for(int i = 0; i < piece.height; i++){
+      for(int j = 0; j < piece.width; j++){
+        if(piece.shape[i][j] != 0){
+          int displayY = cursorY + i;
+          int displayX = cursorX + j;
+          if(isWithinBounds(cursorX, cursorY)){
+            mx.setPoint(displayX, displayY, true);
+          }
+        }
+      }
+    }
+  }
+
+  void clearFallingBlock(const TetrisPiece& piece) {
+    for (int i = 0; i < piece.height; i++) {
+      for (int j = 0; j < piece.width; j++) {
+        // Clear the previous position on the LED matrix
+        if (piece.shape[i][j] != 0) {
+          int displayY = cursorY + i;
+          int displayX = cursorX + j;
+
+          if (isWithinBounds(cursorX, cursorY)) {
+            mx.setPoint(displayX, displayY, false);
+          }
+        }
+      }
+    }
+  }
+
+  bool isWithinBounds(int x, int y) {
+    return ((x >= 0) && (x <= (border_right - currPiece.width)))  && ((y >= 0) && (y <= (border_down - currPiece.height)));
+  }
+
+  void handleGameControls(const TetrisPiece& piece) {
+  int vert = map(analogRead(VERT_PIN), 0, 1023, -100, 100);
+  int horz = map(analogRead(HORZ_PIN), 0, 1023, -100, 100);
+
+  int tetrisPieceWidth = piece.height;
+  int tetrisPieceHeight = piece.width;
+
+  if (horz < -50 && cursorX < border_right - currPiece.width) {
+    cursorX += 1;
+  }
+  if (horz > 50 && cursorX > border_left) {
+    cursorX -= 1;
+  }
+  cursorY = (cursorY < border_down - currPiece.height) ? cursorY + 1 : cursorY;
+  }
+
+  void rotateFallingBlock(TetrisPiece& piece) {
+  bool selPressed = digitalRead(SEL_PIN);
+  if(selPressed == LOW) {
+    clearFallingBlock(piece);
+    int newRotation = (randomTetrisRotation + 1) % 4;
+    if(newRotation != randomTetrisRotation) {
+      randomTetrisRotation = newRotation;
+      piece = tetrisPieces[randomTetrisNumber][randomTetrisRotation];
+    }
+  }
+  }
