@@ -104,8 +104,7 @@
     clearFallingBlock(currPiece);
     
     if(createBlock){
-      currPiece = tetrisPieces[6][1];
-      //currPiece = getRandomPiece();
+      currPiece = getRandomPiece();
       createBlock = !createBlock;
       getRandomCursor();
     }
@@ -113,17 +112,65 @@
     displayFallingBlock(currPiece);
     rotateFallingBlock(currPiece);
 
+    Serial.print("X: ");
+    Serial.print(cursorX);
+    Serial.print(" | Y: ");
+    Serial.print(cursorY);
+    Serial.println();
+
     if(checkPlacement(currPiece)){
       placeTetrisBlock(currPiece);
 
       checkAndDeleteFullRows();
+
+      if (checkLoseCondition()) {
+          // Implement lose condition actions
+          flashPlacedBlocks();
+          resetGame();
+        }
     }
 
     placedBlocksController();
-    delay(200);
+    delay(225);
   }
 
   //Methods ----------------------------------------
+
+bool checkLoseCondition() {
+    // Check if the Tetris piece has reached the spawn area
+    for(int i = 0; i < GRID_WIDTH;i++){
+      if(grid[i][3] == true){
+        return true;
+      }
+    }
+    return false;
+}
+
+void flashPlacedBlocks() {
+    // Flash all placed blocks
+    for (int i = 0; i < 5; i++) {
+        placedBlocksController();
+        delay(250);
+        mx.clear();
+        delay(250);
+    }
+}
+
+void resetGame() {
+    // Reset game variables, clear the grid, and restart the game
+    cursorX = 0;
+    cursorY = 0;
+    createBlock = true;
+
+    for (int i = 0; i < GRID_WIDTH; i++) {
+        for (int j = 0; j < GRID_HEIGHT; j++) {
+            grid[i][j] = false;
+        }
+    }
+
+    mx.clear();
+}
+
 
 void checkAndDeleteFullRows() {
     for (int row = GRID_HEIGHT - 1; row >= 0; row--) {
@@ -194,7 +241,7 @@ void moveRowsDown(int deletedRow) {
 
     // Reset block only if within the right border
     if (cursorX <= border_right - tetrisPieceHeight) {
-      cursorY = 1; // Initial position for the falling tetris block
+      cursorY = 0; // Initial position for the falling tetris block
       createBlock = true;
     }
   }
@@ -263,29 +310,51 @@ void moveRowsDown(int deletedRow) {
   }
 
   void handleGameControls(const TetrisPiece& piece) {
-  int vert = map(analogRead(VERT_PIN), 0, 1023, -100, 100);
-  int horz = map(analogRead(HORZ_PIN), 0, 1023, -100, 100);
+    int vert = map(analogRead(VERT_PIN), 0, 1023, -100, 100);
+    int horz = map(analogRead(HORZ_PIN), 0, 1023, -100, 100);
 
-  int tetrisPieceWidth = piece.height;
-  int tetrisPieceHeight = piece.width;
+    int tetrisPieceWidth = piece.height;
+    int tetrisPieceHeight = piece.width;
 
-  if (horz < -50 && cursorX < border_right - currPiece.width) {
-    cursorX += 1;
+    if (horz < -50 && isValidMove(cursorX + 1, cursorY, piece)) {
+        cursorX += 1;
+    }
+    if (horz > 50 && isValidMove(cursorX - 1, cursorY, piece)) {
+        cursorX -= 1;
+    }
+    cursorY = (cursorY < border_down - currPiece.height) ? cursorY + 1 : cursorY;
   }
-  if (horz > 50 && cursorX > border_left) {
-    cursorX -= 1;
-  }
-  cursorY = (cursorY < border_down - currPiece.height) ? cursorY + 1 : cursorY;
-  }
+
+bool isValidMove(int newX, int newY, const TetrisPiece& piece) {
+    for (int i = 0; i < piece.width; i++) {
+        for (int j = 0; j < piece.height; j++) {
+            int gridX = newX + i;
+            int gridY = newY + j;
+
+            if (gridX < 0 || gridX >= GRID_WIDTH || gridY >= GRID_HEIGHT) {
+                // Check if the move is within bounds
+                return false;
+            }
+
+            if (gridY >= 0 && gridX >= 0 && gridY < GRID_HEIGHT && gridX < GRID_WIDTH) {
+                if (grid[gridX][gridY] && piece.shape[j][i] != 0) {
+                    // Check if the move collides with placed blocks
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 
   void rotateFallingBlock(TetrisPiece& piece) {
-  bool selPressed = digitalRead(SEL_PIN);
-  if(selPressed == LOW) {
-    clearFallingBlock(piece);
-    int newRotation = (randomTetrisRotation + 1) % 4;
-    if(newRotation != randomTetrisRotation) {
-      randomTetrisRotation = newRotation;
-      piece = tetrisPieces[randomTetrisNumber][randomTetrisRotation];
+    bool selPressed = digitalRead(SEL_PIN);
+    if(selPressed == LOW) {
+      clearFallingBlock(piece);
+      int newRotation = (randomTetrisRotation + 1) % 4;
+      if(newRotation != randomTetrisRotation) {
+        randomTetrisRotation = newRotation;
+        piece = tetrisPieces[randomTetrisNumber][randomTetrisRotation];
+      }
     }
-  }
   }
