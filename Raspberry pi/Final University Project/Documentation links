@@ -5,6 +5,8 @@ Getting started with raspberry pi zero w 2:                                 http
 Wiki ARM:                                                                   https://wiki.osdev.org/ARM_Overview
 ARM ARMV-7 documentation:                                                   https://developer.arm.com/documentation/den0013/d/ARM-Architecture-and-Processors?lang=en
 ARM ARMV-8 documentation:                                                   https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/programmer-s-guide-for-armv8-a
+CircuitPython - shows how to load data to PCB                               https://learn.adafruit.com/circuitpython-on-raspberry-pi-bare-metal-no-os/overview
+
 Raspberry pi hardware:                                                      https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-zero-2-w
           - Schematic    -   https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-reduced-schematics.pdf
           - Test pads    -   https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-test-pads.pdf
