@@ -3,6 +3,7 @@ Raspberry pi users forum:                                                   http
 Github repository - Raspberry pi 3 bare metal coding tutorial:              https://github.com/bztsrc/raspi3-tutorial
 Getting started with raspberry pi zero w 2:                                 https://learn.sparkfun.com/tutorials/getting-started-with-the-raspberry-pi-zero-2-w/all
 Wiki ARM:                                                                   https://wiki.osdev.org/ARM_Overview
+ARM ARMV-8 documentation:                                                   https://developer.arm.com/documentation/den0013/d/ARM-Architecture-and-Processors?lang=en
 Raspberry pi hardware:                                                      https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-zero-2-w
           - Schematic    -   https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-reduced-schematics.pdf
           - Test pads    -   https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-test-pads.pdf
