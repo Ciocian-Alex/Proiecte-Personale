@@ -1,3 +1,4 @@
+;This code loops through a 0->3.3v output at GPIO21 
 .global _start
 
 .equ GPIO_BASE, 0x3f200000
