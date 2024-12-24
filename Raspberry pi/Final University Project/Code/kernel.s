@@ -2,7 +2,7 @@
 .global _start
 
 .equ GPIO_BASE, 0x3f200000
-.equ GPFSEL1, 0x08
+.equ GPFSEL2, 0x08	 ;GPIO PIN21 is an output
 
 .equ GPIO_21_OUTPUT, 0x8 ;//# 1 << 3
 
