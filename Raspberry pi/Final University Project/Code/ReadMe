@@ -1,0 +1,8 @@
+1. Find binaries for arm-none-eabi (-as, -ld, -objcopy) in D:\Apps\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-arm-none-eabi\arm-none-eabi\bin
+
+2. Open powershell and CD to D:\Apps\arm-gnu-toolchain-13.3.rel1-mingw-w64-i686-arm-none-eabi\arm-none-eabi\bin
+
+3. use as.exe, ld.exe, objcopy.exe to do the following steps:
+	3.1 as.exe "path to .s file" -o "path for output .o file"
+	3.2 ld.exe "path to .o file" -o "path for output .elf file"
+	3.3 objcopy "path to .elf file" -O binary "path for output kernel7.img"
