@@ -7,6 +7,8 @@ ARM ARMV-7 documentation:                                                   http
 ARM ARMV-8 documentation:                                                   https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/programmer-s-guide-for-armv8-a
 CircuitPython - shows how to load data to PCB                               https://learn.adafruit.com/circuitpython-on-raspberry-pi-bare-metal-no-os/overview
 Raspberry pi zero bare metal coding                                         https://github.com/dwelch67/raspberrypi-zero
+Raspberry pi zero 2w local modules                                          https://learn.sparkfun.com/tutorials/getting-started-with-the-raspberry-pi-zero-2-w/all
+
 ARM assembly code official guide                                            https://developer.arm.com/documentation/100748/0623/Writing-Assembly-Code/Assembling-GNU-syntax-and-armasm-assembly-code?lang=en
 ARM x64 instruction set                                                     https://developer.arm.com/documentation/ddi0602/2022-09/Base-Instructions?lang=en
 
