@@ -4,3 +4,5 @@ C/C++ baremetal programming                       https://www.youtube.com/watch?
     - good tutorial, try starting here, follow steps for compiling
     -show you how to do direct to register programming, but instead of using assembly, 
      we ll use C to turn an LED on and off via the Raspberry Pi's GPIO Interface
+C/C++ wi-fi control                               https://forums.raspberrypi.com/viewtopic.php?t=228248
+    -maybe good to read for library that uses wi-fi
