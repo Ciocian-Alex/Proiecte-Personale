@@ -22,3 +22,6 @@ Getting started with pi pico-series                                             
     - C++ development 
 LwIP wiki                                                                                      https://lwip.fandom.com/wiki/LwIP_Wiki
     -lightweight tcp/ip protocol
+
+Rp2040 project template                                                                        https://github.com/LearnEmbeddedSystems/rp2040-project-template
+Pico w webserver template                                                                      https://github.com/LearnEmbeddedSystems/pico-w-webserver-template
