@@ -1,16 +1,20 @@
-WiringPi - C/C++ libraries                        https://github.com/WiringPi/WiringPi
+WiringPi - C/C++ libraries                                                                    https://github.com/WiringPi/WiringPi
 
 
 Tutorials:
-C++ beginning tutorial                            https://www.youtube.com/watch?v=9KkzekAA_NQ
-C/C++ baremetal programming                       https://www.youtube.com/watch?v=mshVdGlGwBs
+C++ beginning tutorial                                                                        https://www.youtube.com/watch?v=9KkzekAA_NQ
+C/C++ baremetal programming                                                                   https://www.youtube.com/watch?v=mshVdGlGwBs
     - good tutorial, try starting here, follow steps for compiling
     -show you how to do direct to register programming, but instead of using assembly, 
      we ll use C to turn an LED on and off via the Raspberry Pi's GPIO Interface
-C/C++ wi-fi control                               https://forums.raspberrypi.com/viewtopic.php?t=228248
+C/C++ wi-fi control                                                                            https://forums.raspberrypi.com/viewtopic.php?t=228248
     -maybe good to read for library that uses wi-fi
-Blink LED c/C++                                    https://www.youtube.com/watch?v=JhajoAyP8e4
-Programming raspberry pi pico                      https://www.youtube.com/watch?v=NCaL6tXAF0c
+Blink LED c/C++                                                                                https://www.youtube.com/watch?v=JhajoAyP8e4
+Programming raspberry pi pico                                                                  https://www.youtube.com/watch?v=NCaL6tXAF0c
+Micropython pico coding                                                                        https://www.youtube.com/watch?v=Ic4ExTusoTw
+    -very good examples   
 
-Raspberry pi SDK Documentation                    https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf
+
+
+Raspberry pi SDK Documentation                                                                 https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf
     - software development kit
