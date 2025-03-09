@@ -2,3 +2,5 @@ WiringPi - C/C++ libraries                        https://github.com/WiringPi/Wi
 C++ beginning tutorial                            https://www.youtube.com/watch?v=9KkzekAA_NQ
 C/C++ baremetal programming                       https://www.youtube.com/watch?v=mshVdGlGwBs
     - good tutorial, try starting here, follow steps for compiling
+    -show you how to do direct to register programming, but instead of using assembly, 
+     we ll use C to turn an LED on and off via the Raspberry Pi's GPIO Interface
